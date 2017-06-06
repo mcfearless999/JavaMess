@@ -80,12 +80,12 @@ public class Main extends Application {
             //while (true);
 
 
-            //if (quit.compareTo("q:") == 0) {
+            if (quit.compareTo("q:") == 0) {
 
-            //output.close();
-            //input.close();
-            //socket.close();
-            //}
+            output.close();
+            input.close();
+            socket.close();
+            }
         } catch (IOException exception) {
             System.out.println("Error: " + exception);
         }

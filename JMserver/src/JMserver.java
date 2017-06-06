@@ -164,7 +164,7 @@ class clientThread extends Thread {
                 if (line != null)
                 {
 
-                        if (line.startsWith("q:")) {
+                        if (line.startsWith("q;")) {
                             break;
                         }
 
@@ -274,9 +274,17 @@ class clientThread extends Thread {
 
 
 
+            for (int i = 0; i < maxClientsCount; i++) {
+                if (threads[i] != null && threads[i].name != null &&
+                        threads[i].name.compareTo(line.substring(2))==0) {
+                    threads[i].os.println("q:");
+                    //System.out.println(userlist +"foo");
 
 
-                os.println("*** Bye   ***");
+                }
+            }
+
+
 
       /*
        * Clean up. Set the current thread variable to null so that a new client
@@ -323,7 +331,7 @@ class clientThread extends Thread {
             case "q":
                 //logout
 
-                return "q:";
+                return line;
 
             case "r":
                 //register

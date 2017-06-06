@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -43,7 +44,16 @@ public class MainInterface {
         input = in;
         output = out;
 
+        Text scenetitle = new Text("JavaMess");
+        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        VBox title = new VBox(5);
+        title.getChildren().add(scenetitle);
+
+        Text userDisplay = new Text( "logged in as : " + user);
+        title.getChildren().add(userDisplay);
         GridPane messageGrid = new GridPane();
+        messageGrid.add(title, 0, 0, 2, 1);
+        //messageGrid.add(userDisplay,0, 0, 2, 1);
         messageGrid.setAlignment(Pos.CENTER);
         messageGrid.setHgap(10);
         messageGrid.setVgap(5);
@@ -55,7 +65,7 @@ public class MainInterface {
         HBox mDisplay = new HBox(5);
         mDisplay.setAlignment(Pos.TOP_CENTER);
         mDisplay.getChildren().add(messageDisplay);
-        messageGrid.add(mDisplay,0,0);
+        messageGrid.add(mDisplay,0,1);
         //Text dialog = new Text("");
         TextArea messageTextField = new TextArea();
         HBox mTextBox = new HBox(5);
@@ -63,7 +73,7 @@ public class MainInterface {
         mTextBox.getChildren().add(messageTextField);
         messageGrid.add(mTextBox, 0, 2);
 
-        HBox hbBtn = new HBox(5);
+        VBox hbBtn = new VBox(5);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
 
         VBox userList = new VBox(5);
@@ -71,17 +81,25 @@ public class MainInterface {
         userList.setMaxSize(100,400);
         userList.getChildren().add(currentUsers);
 
-        messageGrid.add(userList,2,0);
+        messageGrid.add(userList,2,1);
+
 
         Button sendButton = new Button("send");
         hbBtn.getChildren().add(sendButton);
+        Button exitButton = new Button("quit");
+        hbBtn.getChildren().add(exitButton);
         messageGrid.add(hbBtn, 2, 2);
         //mDisplay.getChildren().add(dialog);
         String dialog ="";
         main = new Scene(messageGrid, 700, 400);
 
 
-
+        exitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                output.println("q;" +userName );
+            }
+        });
 
 
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -164,6 +182,10 @@ public class MainInterface {
                                     }
                                     System.out.println(list);
                                     currentUsers.setText(list);
+                                }
+                                if ( inStream.startsWith("q") ){
+
+                                    window.close();
                                 }
                                 //System.out.println(display);
                             }
