@@ -161,21 +161,20 @@ class clientThread extends Thread {
 
                 line = is.readLine();
                 String response;
-                if (line != null)
-                {
+                if (line != null) {
 
-                        if (line.startsWith("q;")) {
-                            break;
-                        }
+                    if (line.startsWith("q;")) {
+                        break;
+                    }
 
 
                     response = commandHandler(line, JMserver.users);
-                        System.out.println(response);
-                        if (response.substring(0,4).compareTo("auth")==0)
-                        {
-                            name = response.substring(5);
-                        }
-                    os.println(response.substring(0,4));
+                    System.out.println(response);
+
+                    if (response.substring(0, 4).compareTo("auth") == 0) {
+                        name = response.substring(5);
+                    }
+                    os.println(response.substring(0, 4));
                     //System.out.println(response);
                 }
                 //if (response.compareTo("auth") != 0) break;
@@ -210,67 +209,71 @@ class clientThread extends Thread {
 
           /* The message is public, broadcast it to all other clients. */
 
-                    synchronized (this) {
-                        String userlist ="u;";
-                        //os.println(response);
-                        for (int i = 0; i < maxClientsCount; i++) {
-                            if (threads[i] != null && threads[i].name != null) {
-                                System.out.println(i + threads[i].name );
-                                userlist = userlist + threads[i].name + ";";
+                synchronized (this) {
+                    String userlist = "u;";
+                    //os.println(response);
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] != null && threads[i].name != null) {
+                            //System.out.println(i + threads[i].name);
+                            userlist = userlist + threads[i].name + ";";
 
-                            }
-                        }
-                        System.out.println(userlist);
-                        for (int i = 0; i < maxClientsCount; i++) {
-                            if (threads[i] != null && threads[i].name != null) {
-                                threads[i].os.println(userlist);
-                                //System.out.println(userlist +"foo");
-
-
-                            }
-                        }
-                        response =commandHandler(line, JMserver.users);
-                        //os.println(response);
-                        //System.out.println(response);
-                        System.out.println(response);
-                        if (response.substring(0,4).compareTo("m:X:")==0){
-
-                        for (int i = 0; i < maxClientsCount; i++) {
-                            if (threads[i] != null && threads[i].name != null) {
-                                threads[i].os.println( "s:" + name + ": " + response.substring(4));
-
-                            }
                         }
                     }
+                    System.out.println(userlist);
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] != null && threads[i].name != null) {
+                            threads[i].os.println(userlist);
+                            //System.out.println(userlist +"foo");
 
+
+                        }
+                    }
+                    response = commandHandler(line, JMserver.users);
+                    //os.println(response);
+                    //System.out.println(response);
+                    System.out.println(response);
+                    if (response.substring(0, 4).compareTo("m:X:") == 0) {
+
+                        for (int i = 0; i < maxClientsCount; i++) {
+                            if (threads[i] != null && threads[i].name != null) {
+                                threads[i].os.println("s:" + name + ": " + response.substring(4));
+
+                            }
+                        }
                     }
 
                 }
+                if (line.substring(0, 1).compareTo("p") == 0) {
 
-
-
-                String[] words = line.split(":");
-                if (words.length > 1 && words[2] != null) {
-                    words[2] = words[2].trim();
-
+                    String[] words = line.split(";");
+                    //if (words.length > 1 && words[2] != null) {
+                    //words[2] = words[2].trim();
+                    System.out.println(line);
                     if (!words[2].isEmpty()) {
                         synchronized (this) {
                             for (int i = 0; i < maxClientsCount; i++) {
                                 if (threads[i] != null && threads[i] != this
                                         && threads[i].name != null
-                                        && threads[i].name.equals(words[1])) {
-                                    threads[i].os.println("<" + name + "> " + words[1]);
+                                        && threads[i].name.equals(words[2])) {
+                                    threads[i].os.println(line);
+                                    //System.out.println("private message to :" + threads[i].name);
                     /*
                      * Echo this message to let the client know the private
                      * message was sent.
                      */
-                                    this.os.println(name + ": " + words[2]);
+                                    //this.os.println("r;"+words[1] + ";" + words[3]);
                                     break;
                                 }
                             }
                         }
                     }
+                    // }
+
                 }
+
+            }
+
+
 
 
 

@@ -6,20 +6,27 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javafx.application.Application;
 import javafx.application.Platform;
+
 
 
 /**
@@ -35,8 +42,12 @@ public class MainInterface {
     static BufferedReader input;
     static PrintWriter output;
 
+
     TextArea messageDisplay = new TextArea();
-    TextArea currentUsers = new TextArea();
+
+    ListView <Text> displayedMessages = new ListView<>();
+    ListView <String> listofUsers = new ListView<>();
+    //TextArea currentUsers = new TextArea();
 
     public String display(BufferedReader in , PrintWriter out, String user ) throws IOException {
         userName = user;
@@ -51,6 +62,7 @@ public class MainInterface {
 
         Text userDisplay = new Text( "logged in as : " + user);
         title.getChildren().add(userDisplay);
+
         GridPane messageGrid = new GridPane();
         messageGrid.add(title, 0, 0, 2, 1);
         //messageGrid.add(userDisplay,0, 0, 2, 1);
@@ -61,16 +73,19 @@ public class MainInterface {
         messageGrid.setAlignment(Pos.BOTTOM_CENTER);
 
 
-        messageDisplay.setEditable(false);
+        //messageDisplay.setEditable(false);
         HBox mDisplay = new HBox(5);
         mDisplay.setAlignment(Pos.TOP_CENTER);
-        mDisplay.getChildren().add(messageDisplay);
+        mDisplay.getChildren().add(displayedMessages);
         messageGrid.add(mDisplay,0,1);
+        displayedMessages.setMinWidth(550);
         //Text dialog = new Text("");
         TextArea messageTextField = new TextArea();
         HBox mTextBox = new HBox(5);
         mTextBox.setAlignment(Pos.BOTTOM_LEFT);
         mTextBox.getChildren().add(messageTextField);
+        messageTextField.setMinWidth(550);
+        messageTextField.setMaxSize(700,80);
         messageGrid.add(mTextBox, 0, 2);
 
         VBox hbBtn = new VBox(5);
@@ -78,21 +93,54 @@ public class MainInterface {
 
         VBox userList = new VBox(5);
         userList.setAlignment(Pos.TOP_RIGHT);
-        userList.setMaxSize(100,400);
-        userList.getChildren().add(currentUsers);
+        userList.setMaxSize(100,350);
+        userList.getChildren().add(listofUsers);
+
+        TextField selector = new TextField();
 
         messageGrid.add(userList,2,1);
 
 
+        Button privButton = new Button("private message");
+        hbBtn.getChildren().add(privButton);
+        privButton.setMaxSize(100,25);
         Button sendButton = new Button("send");
+        sendButton.setMaxSize(100,25);
         hbBtn.getChildren().add(sendButton);
         Button exitButton = new Button("quit");
+        exitButton.setMaxSize(100,25);
         hbBtn.getChildren().add(exitButton);
         messageGrid.add(hbBtn, 2, 2);
         //mDisplay.getChildren().add(dialog);
         String dialog ="";
-        main = new Scene(messageGrid, 700, 400);
+        main = new Scene(messageGrid, 700, 350);
 
+
+
+        privButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               // PrivateMessage messageWindow = new PrivateMessage();
+               // boolean isOpen = messageWindow.display(input,output, user, "lee", "");
+                String dest = listofUsers.getSelectionModel().getSelectedItem();
+
+                if (dest != null) {
+                    String message = messageTextField.getText();
+                    messageTextField.setText("");
+
+                    //display = display + userName+ ": " + message + "\n";
+                    //messageDisplay.setText(display);
+
+                    //System.out.println(message);
+
+                    output.println("p;" + user + ";" + dest + ";" + message);
+                    Text temp = new Text(user + "<private message" + ">:" + message);
+                    displayedMessages.getItems().add(temp);
+                }else {
+                    messageTextField.setText("please select user from userlist for personal message");
+                }
+            }
+        });
 
         exitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -166,28 +214,106 @@ public class MainInterface {
                             if (input.ready())
                             {
                                 String inStream = input.readLine();
-
+                                //System.out.println(inStream + "foo");
                                 if( inStream.startsWith("s") ){
-                                    display = display  + inStream.substring(2) + "\n";
-                                    messageDisplay.setText(display);
-                                    System.out.println(display);
+                                    //display = display  + inStream.substring(2) + "\n";
+                                    //messageDisplay.setText(display);
+                                    //System.out.println(display);
+
+                                    String[] pubMess = inStream.split(":");
+                                    Text temp = new Text (inStream.substring(2));
+                                    if (pubMess[1].equals(userName))
+                                    {
+                                        temp.setFill(javafx.scene.paint.Color.RED);
+                                    }else {
+                                        temp.setFill(javafx.scene.paint.Color.BLUE);
+                                    }
+                                    //temp.setEditable(false);
+                                    displayedMessages.getItems().add( temp);
+
+
+                                    /*
+                                    TextField temp = new TextField();
+                                    temp.appendText(inStream.substring(2));
+                                    temp.setStyle("-fx-text-fill: blue");
+                                    temp.setEditable(false);
+                                    displayedMessages.getItems().add( temp);
+                                    //messageDisplay.getChildrenUnmodifiable().add(temp);
+                                    */
                                 }
                                 if ( inStream.startsWith("u") ){
-                                    currentUsers.setText("");
-                                    String list="";
+
+                                    listofUsers.getItems().clear();
+
                                     String[] uselist = inStream.split(";");
                                     for (int i = 1; i< uselist.length; ++i)
+
                                     {
-                                        list = list + uselist[i] + "\n";
+                                        if (!uselist[i].equals(userName))
+                                        listofUsers.getItems().add(uselist[i]);
+
                                     }
-                                    System.out.println(list);
-                                    currentUsers.setText(list);
+
+                                    //System.out.println(list);
+                                    //currentUsers.getChildrenUnmodifiable().add(listofUsers);
+                                }
+                                if( inStream.startsWith("p") ){
+
+                                    String[] privMess = inStream.split(";");
+                                    if (privMess.length >= 3) {
+                                        String pMess = privMess[1] + " <private message>:" + privMess[3];
+                                        //messageDisplay.setText(display);
+
+                                        Text temp = new Text(pMess);
+                                        temp.setFill(javafx.scene.paint.Color.GREEN);
+                                        //temp.setEditable(false);
+                                        displayedMessages.getItems().add(temp);
+                                    }
+                                    /*
+                                    TextField temp = new TextField();
+                                    temp.setStyle("-fx-text-fill: green;");
+                                    temp.appendText(pMess);
+                                    displayedMessages.getItems().add(temp);
+                                    temp.setEditable(false);
+                                    //messageDisplay.getChildrenUnmodifiable().add(temp);
+                                    System.out.println(display);
+
+
+                                    /*
+                                    boolean isOpen;
+                                    String[] privMess = inStream.split(";");
+                                    int idx =0;
+                                    for (int i = 0; i < 10; ++i)
+                                    {
+                                        if (openPrivates[i] == null)
+                                        {
+                                            openPrivates[i] = privMess[2];
+                                            idx = i;
+                                            break;
+                                        }
+                                        if (openPrivates[i].equals(privMess[2]))
+                                        {
+                                            idx = i;
+                                            break;
+                                        }
+                                    }
+
+                                    isOpen = true;
+
+                                    String incMess = privMess[1] +": " + privMess[3];
+                                    PrivateMessage messageWindow = new PrivateMessage();
+
+                                    isOpen = messageWindow.display(input,output, privMess[2], privMess[1],incMess);
+                                    openPrivates[idx] = null;
+                                    */
                                 }
                                 if ( inStream.startsWith("q") ){
 
                                     window.close();
                                 }
-                                //System.out.println(display);
+                                //output.println("@ping");
+                                        //System.out.println(display);
+
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
