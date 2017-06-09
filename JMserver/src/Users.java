@@ -3,6 +3,7 @@
  */
 
 
+import java.io.*;
 
 
 class user
@@ -33,4 +34,9 @@ class user
         System.out.println(passWord_);
         System.out.println(status);
     }
+    String write()
+    {
+        return userName_ + ":" + passWord_ + "\n";
+    }
 }
+

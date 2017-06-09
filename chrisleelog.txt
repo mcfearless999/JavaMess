@@ -1,0 +1,4 @@
+chris: It looks like public messages work, do private?
+lee: It looks like they do, now I just need to check the file
+chris: why isn't it working?
+chris: private message

@@ -67,9 +67,9 @@ public class MainInterface {
         messageGrid.add(title, 0, 0, 2, 1);
         //messageGrid.add(userDisplay,0, 0, 2, 1);
         messageGrid.setAlignment(Pos.CENTER);
-        messageGrid.setHgap(10);
+        messageGrid.setHgap(5);
         messageGrid.setVgap(5);
-        messageGrid.setPadding(new Insets(25, 0, 25, 25));
+        messageGrid.setPadding(new Insets(25, 25, 25, 25));
         messageGrid.setAlignment(Pos.BOTTOM_CENTER);
 
 
@@ -79,13 +79,13 @@ public class MainInterface {
         mDisplay.getChildren().add(displayedMessages);
         messageGrid.add(mDisplay,0,1);
         displayedMessages.setMinWidth(550);
-        //Text dialog = new Text("");
+
         TextArea messageTextField = new TextArea();
         HBox mTextBox = new HBox(5);
         mTextBox.setAlignment(Pos.BOTTOM_LEFT);
         mTextBox.getChildren().add(messageTextField);
         messageTextField.setMinWidth(550);
-        messageTextField.setMaxSize(700,80);
+        messageTextField.setMaxSize(700,120);
         messageGrid.add(mTextBox, 0, 2);
 
         VBox hbBtn = new VBox(5);
@@ -93,29 +93,51 @@ public class MainInterface {
 
         VBox userList = new VBox(5);
         userList.setAlignment(Pos.TOP_RIGHT);
-        userList.setMaxSize(100,350);
+        userList.setMaxSize(120,350);
+        userList.setMinWidth(120);
         userList.getChildren().add(listofUsers);
 
-        TextField selector = new TextField();
+
 
         messageGrid.add(userList,2,1);
 
-
+        Button histButton = new Button("get history");
+        hbBtn.getChildren().add(histButton);
+        histButton.setMaxSize(120,20);
         Button privButton = new Button("private message");
         hbBtn.getChildren().add(privButton);
-        privButton.setMaxSize(100,25);
+        privButton.setMaxSize(120,20);
         Button sendButton = new Button("send");
-        sendButton.setMaxSize(100,25);
+        sendButton.setMaxSize(120,20);
         hbBtn.getChildren().add(sendButton);
         Button exitButton = new Button("quit");
-        exitButton.setMaxSize(100,25);
+        exitButton.setMaxSize(120,20);
         hbBtn.getChildren().add(exitButton);
         messageGrid.add(hbBtn, 2, 2);
         //mDisplay.getChildren().add(dialog);
         String dialog ="";
-        main = new Scene(messageGrid, 700, 350);
+        main = new Scene(messageGrid, 720, 450);
 
 
+        histButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String dest = listofUsers.getSelectionModel().getSelectedItem();
+                String histReq = "h:";
+                if (dest != null) {
+                    if (user.compareTo(dest) == 0) {
+                        messageTextField.setText("error");
+                    }
+
+                        histReq = histReq +  user + ":" + dest;
+                        output.println(histReq);
+
+
+
+                }
+
+            }
+        });
 
         privButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -134,8 +156,8 @@ public class MainInterface {
                     //System.out.println(message);
 
                     output.println("p;" + user + ";" + dest + ";" + message);
-                    Text temp = new Text(user + "<private message" + ">:" + message);
-                    displayedMessages.getItems().add(temp);
+                    //Text temp = new Text(user + "<private message" + ">:" + message);
+                    //displayedMessages.getItems().add(temp);
                 }else {
                     messageTextField.setText("please select user from userlist for personal message");
                 }
@@ -145,7 +167,7 @@ public class MainInterface {
         exitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                output.println("q;" +userName );
+                output.println("q;" +user );
             }
         });
 
@@ -176,6 +198,10 @@ public class MainInterface {
 
         return "q:";
     }
+
+
+
+
     public void startTask()
     {
         // Create a Runnable
@@ -307,6 +333,16 @@ public class MainInterface {
                                     openPrivates[idx] = null;
                                     */
                                 }
+                                if ( inStream.startsWith("h") ){
+                                    String[] hist = inStream.split(";");
+                                    //System.out.println(hist[2]);
+                                    if (hist.length >= 3) {
+                                       boolean catcher = historyWindow.display(hist[2]);
+                                    }
+
+                                }
+
+
                                 if ( inStream.startsWith("q") ){
 
                                     window.close();

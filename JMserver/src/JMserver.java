@@ -24,19 +24,15 @@ public class JMserver {
     private static final int maxClientsCount = 10;
     private static final clientThread[] threads = new clientThread[maxClientsCount];
     static Hashtable users = new Hashtable< String, user> ();
-
+    static boolean runServer = true;
+    private static String filePath = "/Users/chrism/CS300/";
 
     public static void main(String[] args) {
 
         int portNumber = 5000;
 
-        stringQueue inQueue = new stringQueue();
+        loadUsers();
 
-        String line = " ";
-        user chris = new user("chris", "foo");
-        users.put("chris", chris);
-        user lee = new user("lee", "bar");
-        users.put("lee", lee);
 
         try {
             serverSocket = new ServerSocket(portNumber);
@@ -44,7 +40,7 @@ public class JMserver {
             System.out.println(e);
         }
 
-        while (true) {
+        while (runServer) {
             try {
                 clientSocket = serverSocket.accept();
                 int i = 0;
@@ -65,68 +61,78 @@ public class JMserver {
             }
 
         }
-}
-
-
-
-
-        /*
-
-
-        try {
-            ServerSocket sSocket = new ServerSocket(5000);
-            System.out.println("Server started at: " + new Date());
-
-            //Wait for a client to connect
-            Socket socket = sSocket.accept();
-
-            //Create the streams
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            //Tell the client that he/she has connected
-            output.println("You have connected at: " + new Date());
-            //String chatInput = input.readLine();
-            //System.out.println(chatInput);
-
-            //Loop that runs server functions
-           while  (line.substring(0,1).compareTo("q") !=0 ) {
-               String chatInput = input.readLine();
-               //while (chatInput != null) {
-
-                   //This will wait until a line of text has been sent
-                   node tempNode = new node(chatInput);
-                   inQueue.add(tempNode);
-               //socket = sSocket.accept();
-                   //chatInput = input.readLine();
-
-               //}
-               //node tempNode = new node(chatInput);
-               inQueue.add(tempNode);
-               while (inQueue.check() == true) {
-                   if (line != null) {
-                       line = inQueue.dequeue();
-                       String code = commandHandler(line, users);
-                       output.println(code);
-
-                   }
-
-               }
-
-           }
-
-        } catch (IOException exception) {
-            System.out.println("Error: " + exception);
-        }
-
 
     }
-*/
+    static void loadUsers()
+    {
+        File infile = new File(filePath + "chatusers.txt");
+        try {
+        BufferedReader b = new BufferedReader(new FileReader(infile));
+
+        String readLine = "";
+
+
+            while ((readLine = b.readLine()) != null) {
+                String[] tempUser = readLine.split(":");
+                user temp = new user(tempUser[0],tempUser[1]);
+                users.put(tempUser[0], temp);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 
+
+       static public void fileWriter() {
+           Set<String> keys = JMserver.users.keySet();
+
+           BufferedWriter bw = null;
+           FileWriter fw = null;
+           File file = new File(filePath + "chatusers.txt");
+           try {
+               file.createNewFile();
+
+               if (!file.exists()) {
+                   file.createNewFile();
+               }
+               fw = new FileWriter(file);
+               bw = new BufferedWriter(fw);
+               for (String key : keys) {
+                   user temp = (user) JMserver.users.get(key);
+                   String data = temp.write();
+                   fw.write(data);
+
+               }
+               fw.close();
+           } catch (IOException e) {
+               e.printStackTrace();
+           } finally {
+
+               try {
+
+                   if (bw != null)
+                       bw.close();
+
+                   if (fw != null)
+                       fw.close();
+
+               } catch (IOException ex) {
+
+                   ex.printStackTrace();
+
+               }
+           }
+       }
 
 }
+
+
+
+
 
 class clientThread extends Thread {
 
@@ -135,7 +141,8 @@ class clientThread extends Thread {
     private PrintStream os = null;
     private Socket clientSocket = null;
     private final clientThread[] threads;
-    private int maxClientsCount;
+    static private int maxClientsCount;
+    private boolean runThread = true;
 
 
     public clientThread(Socket clientSocket, clientThread[] threads) {
@@ -157,7 +164,7 @@ class clientThread extends Thread {
 
             String line = is.readLine();
             System.out.println(line);
-            while (true) {
+            while (runThread) {
 
                 line = is.readLine();
                 String response;
@@ -168,7 +175,7 @@ class clientThread extends Thread {
                     }
 
 
-                    response = commandHandler(line, JMserver.users);
+                    response = loginHandler(line, JMserver.users);
                     System.out.println(response);
 
                     if (response.substring(0, 4).compareTo("auth") == 0) {
@@ -177,37 +184,6 @@ class clientThread extends Thread {
                     os.println(response.substring(0, 4));
                     //System.out.println(response);
                 }
-                //if (response.compareTo("auth") != 0) break;
-                //name = is.readLine().trim();
-                // if (name.indexOf('@') == -1) {
-                //break;
-                //} else {
-                //os.println("The name should not contain '@' character.");
-                //}
-                //}
-
-      /* Welcome the new the client.
-            os.println("Welcome " + name
-                    + " to our chat room.\nTo leave enter /quit in a new line.");
-            synchronized (this) {
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] != null && threads[i] == this) {
-                        clientName = "@" + name;
-                        break;
-                    }
-                }
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] != null && threads[i] != this) {
-                        threads[i].os.println("*** A new user " + name
-                                + " entered the chat room !!! ***");
-                    }
-                }
-            }
-      /* Start the conversation. */
-
-        /* If the message is private sent it to the given client. */
-
-          /* The message is public, broadcast it to all other clients. */
 
                 synchronized (this) {
                     String userlist = "u;";
@@ -228,8 +204,8 @@ class clientThread extends Thread {
 
                         }
                     }
-                    response = commandHandler(line, JMserver.users);
-                    //os.println(response);
+                    response = messageHandler(line);
+                    os.println(response);
                     //System.out.println(response);
                     System.out.println(response);
                     if (response.substring(0, 4).compareTo("m:X:") == 0) {
@@ -243,19 +219,19 @@ class clientThread extends Thread {
                     }
 
                 }
-                if (line.substring(0, 1).compareTo("p") == 0) {
+                if ((line.substring(0, 1).compareTo("p") == 0) ||line.startsWith("h;")) {
 
                     String[] words = line.split(";");
                     //if (words.length > 1 && words[2] != null) {
                     //words[2] = words[2].trim();
-                    System.out.println(line);
+                    System.out.println(words[2]);
                     if (!words[2].isEmpty()) {
                         synchronized (this) {
                             for (int i = 0; i < maxClientsCount; i++) {
                                 if (threads[i] != null && threads[i] != this
                                         && threads[i].name != null
                                         && threads[i].name.equals(words[2])) {
-                                    threads[i].os.println(line);
+                                    threads[i].os.print(line);
                                     //System.out.println("private message to :" + threads[i].name);
                     /*
                      * Echo this message to let the client know the private
@@ -311,7 +287,7 @@ class clientThread extends Thread {
             }
 
     }
-    static String commandHandler(String line, Hashtable users) {
+     String loginHandler(String line, Hashtable users) {
         //get command from front of string
         String command = line.substring(0, 1);
         //parse line
@@ -321,16 +297,16 @@ class clientThread extends Thread {
             case "l":
                 //check login information
                 //login()
-                String[] tempLogin =line.split(":");
+                String[] tempLogin = line.split(":");
                 user loginUser = (user) users.get(tempLogin[1]);
                 if (loginUser == null) return null;
-                if (loginUser.passWord_.compareTo(tempLogin[2]) ==0) {
+                if (loginUser.passWord_.compareTo(tempLogin[2]) == 0) {
                     //name = tempLogin[1];
                     return ("auth:" + tempLogin[1]);
                 }
 
 
-                return null;
+                return "error:unf";
             case "q":
                 //logout
 
@@ -338,37 +314,139 @@ class clientThread extends Thread {
 
             case "r":
                 //register
-                String[] tempReg =line.split(":");
+                String[] tempReg = line.split(":");
                 if (tempReg[1].startsWith("X")) return "error";
-                if (users.get(tempReg[1]) !=null) return "error";
+                if (users.get(tempReg[1]) != null) return "error";
                 //parse
-                user newUser = new user(tempReg[1],tempReg[2] );
+                user newUser = new user(tempReg[1], tempReg[2]);
                 users.put(tempReg[1], newUser);
 
-                return "reg";
-
-            case "h":
-                //retrieve history
-                return null;
-
-            case "m":
-                //send message
-                //System.out.println("message received");
-                String[] tempMess =line.split(":");
-                if (tempMess[1].compareTo("X") ==0)
-                {
-                    //copy message to public file
-                    return (tempMess[0] + ":X:" + tempMess[2] );
-                }
+                return "reg:" + tempReg[1] ;
 
 
-                return null;
 
         }
         //System.out.println(line);
 
         return line;
 
+    }
+
+    String messageHandler(String line) {
+        //get command from front of string
+        String command = line.substring(0, 1);
+        //parse line
+
+        switch (command) {
+            case "h":
+                //retrieve history
+                String history = "";
+
+                String path = "/Users/chrism/CS300/";
+
+                String[] words = line.split(":");
+                String sender = words[1];
+
+                if (words[1].compareTo(words[2]) > 0) {
+                    String temp = words[1];
+                    words[1] = words[2];
+                    words[2] = temp;
+                }
+                System.out.println(path + words[1] + words[2] + "log.txt");
+                File infile = new File(path + words[1] + words[2] + "log.txt");
+                try {
+                    BufferedReader b = new BufferedReader(new FileReader(infile));
+
+                    String readLine = "";
+
+
+                    while ((readLine = b.readLine()) != null) {
+                    history =history + readLine + "`";
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //System.out.println(history);
+                return "h;" + sender + ";" +history;
+
+            case "p":
+
+                 words = line.split(";");
+                 sender = words[1];
+
+                if (words[1].compareTo(words[2]) > 0) {
+                    String temp = words[1];
+                    words[1] = words[2];
+                    words[2] = temp;
+                }
+                path = "/Users/chrism/CS300/";
+
+                String historyFileName = path + words[1] + words[2] + "log.txt";
+
+                BufferedWriter bw = null;
+                FileWriter fw = null;
+                File file = new File(historyFileName);
+                try {
+                    file.createNewFile();
+
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+                    fw = new FileWriter(file.getAbsoluteFile(), true);
+                    bw = new BufferedWriter(fw);
+
+                    fw.write(sender + ": " + words[3] + "\n");
+
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+
+                    try {
+
+                        if (bw != null)
+                            bw.close();
+
+                        if (fw != null)
+                            fw.close();
+
+                    } catch (IOException ex) {
+
+                        ex.printStackTrace();
+
+                    }
+                }
+
+                return line;
+            case "m":
+                //send message
+                //System.out.println("message received");
+                String[] tempMess = line.split(":");
+                if (tempMess[1].compareTo("X") == 0) {
+                    //copy message to public file
+                    if (tempMess[2].equals("killserver")) {
+                        JMserver.fileWriter();
+                        //killThread();
+                    }
+                    return (tempMess[0] + ":X:" + tempMess[2]);
+
+                }
+
+
+
+        }
+        return line;
+    }
+
+
+    void killThread()
+    {
+        for (int i = 0; i < maxClientsCount; i++)
+        {
+            threads[i].runThread = false;
+        }
     }
 
 }
