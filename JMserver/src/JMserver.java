@@ -202,15 +202,15 @@ class clientThread extends Thread {
                     for (int i = 0; i < maxClientsCount; i++) {
                         if (threads[i] != null && threads[i].name != null) {
                             threads[i].os.println(userlist);
-                            //System.out.println(userlist +"foo");
+
 
 
                         }
                     }
                     response = messageHandler(line);
                     os.println(response);
-                    //System.out.println(response);
-                    System.out.println(response);
+
+
                     if (response.substring(0, 4).compareTo("m:X:") == 0) {
 
                         for (int i = 0; i < maxClientsCount; i++) {
@@ -227,7 +227,7 @@ class clientThread extends Thread {
                     String[] words = line.split(";");
                     //if (words.length > 1 && words[2] != null) {
                     //words[2] = words[2].trim();
-                    System.out.println(words[2]);
+
                     if (!words[2].isEmpty()) {
                         synchronized (this) {
                             for (int i = 0; i < maxClientsCount; i++) {
@@ -235,12 +235,12 @@ class clientThread extends Thread {
                                         && threads[i].name != null
                                         && threads[i].name.equals(words[2])) {
                                     threads[i].os.print(line);
-                                    //System.out.println("private message to :" + threads[i].name);
+
                     /*
                      * Echo this message to let the client know the private
                      * message was sent.
                      */
-                                    //this.os.println("r;"+words[1] + ";" + words[3]);
+
                                     break;
                                 }
                             }
@@ -424,8 +424,7 @@ class clientThread extends Thread {
 
                 return line;
             case "m":
-                //send message
-                //System.out.println("message received");
+
                 String[] tempMess = line.split(":");
                 if (tempMess[1].compareTo("X") == 0) {
                     //copy message to public file

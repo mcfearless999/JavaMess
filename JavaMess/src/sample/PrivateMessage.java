@@ -117,7 +117,7 @@ public class PrivateMessage
                 //display = display + userName+ ": " + message + "\n";
                 //messageDisplay.setText(display);
 
-                System.out.println(message);
+
                 output.println("p;" + user + ";" + dest + ";" + message);
                 //window.close();
             }

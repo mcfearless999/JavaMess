@@ -27,7 +27,9 @@ public class Login {
     static Scene login, register;
 
     public static String display(String error) {
+
         window = new Stage();
+        window.setTitle("welcome to JavaMess");
         GridPane loginGrid = new GridPane();
         loginGrid.setAlignment(Pos.CENTER);
         loginGrid.setHgap(10);
@@ -77,14 +79,10 @@ public class Login {
 
                 String Username = userTextField.getText();
 
-                //System.out.println(Username);
-                //userName = Username;
 
                 String rawPw = pwBox.getText();
                 loginPacket = "l:" + Username +":" + rawPw;
-                //Auth = login;
-                //System.out.println(rawPw);
-                // output.println(login);
+
                 window.close();
             }
         });
@@ -145,17 +143,14 @@ public class Login {
             public void handle(ActionEvent e) {
 
                 String Username = userNameTextField.getText();
-                //System.out.println(Username);
-                //userName = Username;
+              
                 loginPacket = "e";
                 String newPw1 = pwBox1.getText();
                 String newPw2 = pwBox2.getText();
                 //boolean status = false;
                 if (newPw1.compareTo(newPw2) == 0) loginPacket = "r:" + Username + ":" + newPw1;
 
-                //Auth = login;
-                //System.out.println(Username + " "+ status);
-                // output.println(login);
+
                 window.close();
             }
         });
