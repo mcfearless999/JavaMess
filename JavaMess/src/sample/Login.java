@@ -26,7 +26,7 @@ public class Login {
     static Stage window;
     static Scene login, register;
 
-    public static String display() {
+    public static String display(String error) {
         window = new Stage();
         GridPane loginGrid = new GridPane();
         loginGrid.setAlignment(Pos.CENTER);
@@ -57,6 +57,19 @@ public class Login {
         hbBtn.getChildren().add(loginButton);
         loginGrid.add(hbBtn, 1, 4);
 
+        HBox errorbox = new HBox(5);
+
+        if (!error.equals(""))
+        {
+            error = errorHandler(error);
+        }
+
+        Text Errors = new Text(error);
+        Errors.setFill(javafx.scene.paint.Color.RED);
+        errorbox.getChildren().add(Errors);
+
+
+
         loginButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -83,7 +96,7 @@ public class Login {
         loginGrid.add(hbBtn1, 0, 4);
         registerButton.setOnAction(e -> window.setScene(register));
 
-
+        loginGrid.add(errorbox,1,6);
         login = new Scene(loginGrid);
         window.setScene(login);
 
@@ -154,5 +167,32 @@ public class Login {
 
 
         return loginPacket;
+    }
+
+    static String errorHandler(String error)
+    {
+        String errorMessage="";
+        if (!error.equals("")){
+            String[] temp = error.split(":");
+
+            switch (temp[1]) {
+                case "pwf":
+                    errorMessage = "Error: your password is incorrect";
+                    break;
+                case "AR":
+                    errorMessage = "Error: That username is already registered";
+                    break;
+                case "unf":
+                    errorMessage = "Error: That username is not found, please register";
+                    break;
+                case "X":
+                    errorMessage = "Error: user names cannot contain X";
+                    break;
+
+
+        }
+
+    }
+        return errorMessage;
     }
 }

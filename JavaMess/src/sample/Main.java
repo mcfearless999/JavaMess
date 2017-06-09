@@ -58,16 +58,23 @@ public class Main extends Application {
             String auth = "";
             String[] tempReg;
 
-            while (auth.compareTo("auth") != 0) {
-                loginPacket = Login.display();
+            while (!auth.startsWith("auth") && !auth.startsWith("reg")) {
+                loginPacket = Login.display(auth);
                 output.println(loginPacket);
-                System.out.println(loginPacket);
+                //System.out.println(loginPacket);
                 //System.out.println("postlogin");
-                //if (input.ready())
+                if (input.ready()){
+                    input.readLine();
+                    if (auth.startsWith("auth") || auth.startsWith("reg")) break;
+                }
                 auth = input.readLine();
-
-
                 System.out.println(auth);
+                if (auth.startsWith("error"))
+                {
+
+                }
+
+
 
             }
 

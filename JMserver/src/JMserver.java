@@ -164,7 +164,8 @@ class clientThread extends Thread {
 
             String line = is.readLine();
             System.out.println(line);
-            while (runThread) {
+            boolean notLoggedIn = true;
+            while (!line.startsWith("q")) {
 
                 line = is.readLine();
                 String response;
@@ -178,10 +179,12 @@ class clientThread extends Thread {
                     response = loginHandler(line, JMserver.users);
                     System.out.println(response);
 
-                    if (response.substring(0, 4).compareTo("auth") == 0) {
-                        name = response.substring(5);
+                    if (response.startsWith("auth") || response.startsWith("reg") ) {
+                        String[] temp = response.split(":");
+                        name = temp[1];
+                        notLoggedIn = false;
                     }
-                    os.println(response.substring(0, 4));
+                    os.println(response);
                     //System.out.println(response);
                 }
 
@@ -299,14 +302,14 @@ class clientThread extends Thread {
                 //login()
                 String[] tempLogin = line.split(":");
                 user loginUser = (user) users.get(tempLogin[1]);
-                if (loginUser == null) return null;
+                if (loginUser == null) return "err:unf";
                 if (loginUser.passWord_.compareTo(tempLogin[2]) == 0) {
                     //name = tempLogin[1];
                     return ("auth:" + tempLogin[1]);
                 }
 
 
-                return "error:unf";
+                return "err:pwf";
             case "q":
                 //logout
 
@@ -315,8 +318,8 @@ class clientThread extends Thread {
             case "r":
                 //register
                 String[] tempReg = line.split(":");
-                if (tempReg[1].startsWith("X")) return "error";
-                if (users.get(tempReg[1]) != null) return "error";
+                if (tempReg[1].startsWith("X")) return "err:X";
+                if (users.get(tempReg[1]) != null) return "err:AR";
                 //parse
                 user newUser = new user(tempReg[1], tempReg[2]);
                 users.put(tempReg[1], newUser);
@@ -433,7 +436,10 @@ class clientThread extends Thread {
                     return (tempMess[0] + ":X:" + tempMess[2]);
 
                 }
+            case "q":
+                //logout
 
+                return line;
 
 
         }
